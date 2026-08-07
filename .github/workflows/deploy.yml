@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Lets you re-run a deploy from the Actions tab without pushing a commit.
+  # Prefer this over the "Re-run jobs" button: re-running reuses the same run,
+  # and the artifact from the first attempt is still attached, so the deploy
+  # step fails with "Multiple artifacts named github-pages".
+  workflow_dispatch:
+
+# Allow the workflow to publish to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If several pushes land close together, let the in-progress deploy finish
+# and queue the newest one rather than cancelling mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        # The calendar reads these at build time. They are repository secrets so
+        # the values are never committed; without them the site still builds and
+        # shows its sample events instead of failing.
+        env:
+          VITE_GCAL_ID: ${{ secrets.VITE_GCAL_ID }}
+          VITE_GCAL_KEY: ${{ secrets.VITE_GCAL_KEY }}
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+        with:
+          # Switches the repository from branch-based Pages to Actions-based
+          # publishing. Without it, GitHub serves the repo root as-is — which
+          # means raw index.html and a site with no CSS.
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

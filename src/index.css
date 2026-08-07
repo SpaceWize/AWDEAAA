@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* Purple, with neutrals tinted toward it so greys read as part of the palette
+   rather than as a separate cold grey sitting on top of a warm colour.
+
+   Three purples, because one cannot do all three jobs:
+   --color-brand        buttons and large accents. 7.0:1 on paper.
+   --color-brand-deep   small text that may sit over a drifting bubble, where
+                        --color-brand only manages 4.2:1 and fails the 4.5:1
+                        small-text rule. 5.9:1 in that worst case.
+   --color-brand-bright decorative only — the bubbles. Never used for text. */
+@theme {
+  --color-ink: #1b1425;
+  --color-brand: #6d28d9;
+  --color-brand-dark: #5b21b6;
+  --color-brand-deep: #4c1d95;
+  --color-brand-bright: #8b5cf6;
+  --color-paper: #fdfcff;
+  --color-mist: #f4f1fb;
+  --color-slab: #241a33;
+
+  /* Purple-tinted text greys. Both clear AA over paper, mist, and over a
+     bubble at full strength. */
+  --color-body: #453a55;
+  --color-body-strong: #2a2135;
+}
+
+/* Scroll animation is driven by src/lib/smoothScroll.ts so the duration is
+   controllable; CSS smooth scrolling would fight it. */
+html {
+  /* Belt-and-braces against horizontal scroll: entrance animations translate
+     elements off-axis before settling. */
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Long words (names, email addresses, URLs) must not force horizontal scroll
+   at narrow widths or high zoom. */
+h1, h2, h3, h4, p, li, dd, td, th {
+  overflow-wrap: break-word;
+}
+
+/* Two-tone ring so the focus indicator stays visible on any background in the
+   palette — a single purple outline disappears against the purple slab, and a
+   single white one disappears against paper. */
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #fff;
+  border-radius: 4px;
+}
+
+/* On the dark slab the ring inverts, since white-on-dark is what reads there. */
+.on-slab :focus-visible {
+  outline-color: #fff;
+  box-shadow: 0 0 0 6px var(--color-slab);
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -100px;
+  z-index: 100;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: var(--color-ink);
+  color: #fff;
+  font-weight: 600;
+  transition: top 200ms ease;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* Respects the OS "increase contrast" setting, which is separate from reduced
+   motion and commonly on for low-vision users: drop the tinted backgrounds and
+   push text to maximum contrast. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-body: #241c30;
+    --color-body-strong: #140f1c;
+    --color-mist: #f7f5fc;
+  }
+
+  .bubble-layer {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Printing a page of events is a real thing people do before heading out. */
+@media print {
+  .bubble-layer,
+  .skip-link {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}
