@@ -30,7 +30,7 @@ const routes: Record<string, { title: string; label: string; element: ReactNode 
 };
 
 const NotFound = () => (
-  <section className="grid min-h-screen place-items-center px-6 pt-24">
+  <section className="grid min-h-[100svh] place-items-center px-6 pt-24">
     <div className="text-center">
       <h1 className="mb-4 text-5xl font-extrabold tracking-tight text-[var(--color-body-strong)]">
         Page not found

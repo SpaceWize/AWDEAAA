@@ -20,7 +20,7 @@ const Donate = () => (
   <>
     <section className="relative overflow-hidden bg-[var(--color-mist)] px-6 pt-36 pb-20 md:px-12">
       <AmbientBackdrop />
-      <div className="relative mx-auto grid max-w-6xl items-center gap-14 md:grid-cols-2">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-8 md:gap-14 md:grid-cols-2">
         <ScrollReveal direction="left">
           <p className={`mb-4 ${eyebrow}`}>Join us</p>
           <h1 className="mb-6 text-5xl font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)] md:text-6xl">
@@ -40,7 +40,7 @@ const Donate = () => (
       </div>
     </section>
 
-    <section className="px-6 py-24 md:px-12">
+    <section className="px-6 py-14 md:px-12 md:py-24">
       <div className="mx-auto max-w-3xl">
         <ScrollReveal>
           <h2 className={`mb-8 ${sectionTitle}`}>Your donation matters</h2>
@@ -66,7 +66,7 @@ const Donate = () => (
       </div>
     </section>
 
-    <section className="bg-[var(--color-slab)] px-6 py-24 text-white md:px-12">
+    <section className="bg-[var(--color-slab)] px-6 py-14 text-white md:px-12 md:py-24">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal className="mb-14 max-w-2xl">
           <h2 className="text-4xl font-extrabold tracking-tight md:text-5xl">
@@ -90,7 +90,7 @@ const Donate = () => (
       </div>
     </section>
 
-    <section className="relative overflow-hidden px-6 py-24 md:px-12">
+    <section className="relative overflow-hidden px-6 py-14 md:px-12 md:py-24">
       <AmbientBackdrop />
       <div className="relative mx-auto max-w-3xl">
         <ScrollReveal>

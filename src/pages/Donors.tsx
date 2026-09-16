@@ -31,7 +31,7 @@ const Donors = () => (
       </div>
     </section>
 
-    <section className="px-6 py-24 md:px-12">
+    <section className="px-6 py-14 md:px-12 md:py-24">
       <div className="mx-auto max-w-4xl">
         <ScrollReveal className="mb-10">
           <h2 className={sectionTitle}>Our donors</h2>
@@ -96,7 +96,7 @@ const Donors = () => (
       </div>
     </section>
 
-    <section className="bg-[var(--color-slab)] px-6 py-24 text-white md:px-12">
+    <section className="bg-[var(--color-slab)] px-6 py-14 text-white md:px-12 md:py-24">
       <div className="mx-auto max-w-3xl text-center">
         <ScrollReveal>
           <h2 className="mb-6 text-4xl font-extrabold tracking-tight md:text-5xl">

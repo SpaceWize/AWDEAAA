@@ -53,7 +53,7 @@ const EventsCalendar = () => {
   return (
     <section
       id="events"
-      className="bg-[var(--color-paper)] px-6 py-24 md:px-12"
+      className="bg-[var(--color-paper)] px-6 py-14 md:px-12 md:py-24"
       aria-labelledby="events-heading"
     >
       <div className="mx-auto max-w-4xl">

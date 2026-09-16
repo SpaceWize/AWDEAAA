@@ -29,8 +29,8 @@ const Home = () => (
         against something calm. Video first, so that on a phone the media
         arrives before its caption in both this section and Accessible venues
         — the visual order and the reading order stay the same. */}
-    <section id="about" className="bg-[var(--color-paper)] px-6 py-24 md:px-12">
-      <div className="mx-auto grid max-w-6xl items-center gap-14 md:grid-cols-2">
+    <section id="about" className="bg-[var(--color-paper)] px-6 py-14 md:px-12 md:py-24">
+      <div className="mx-auto grid max-w-6xl items-center gap-8 md:gap-14 md:grid-cols-2">
         <ScrollReveal direction="left">
           <ScrollScrubVideo
             src="media/about-conversation.mp4"
@@ -57,7 +57,7 @@ const Home = () => (
     {/* The one dark moment on the page. A deep plum slab gives the eye somewhere
         to land between two light sections, and lets the offer cards read as
         lit objects rather than more boxes on more paper. */}
-    <section className="on-slab bg-[var(--color-slab)] px-6 py-24 text-white md:px-12">
+    <section className="on-slab bg-[var(--color-slab)] px-6 py-14 text-white md:px-12 md:py-24">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal className="mb-14 max-w-2xl">
           <h2 className="mb-6 text-4xl font-extrabold tracking-tight md:text-5xl">
@@ -99,7 +99,7 @@ const Home = () => (
 
     <EventsCalendar />
 
-    <section className="bg-[var(--color-paper)] px-6 py-24 md:px-12">
+    <section className="bg-[var(--color-paper)] px-6 py-14 md:px-12 md:py-24">
       <div className="mx-auto max-w-3xl text-center">
         <ScrollReveal>
           <h2 className={`mb-6 ${sectionTitle}`}>Get involved</h2>
@@ -114,8 +114,8 @@ const Home = () => (
       </div>
     </section>
 
-    <section className="bg-[var(--color-mist)] px-6 py-24 md:px-12">
-      <div className="mx-auto grid max-w-6xl items-center gap-14 md:grid-cols-2">
+    <section className="bg-[var(--color-mist)] px-6 py-14 md:px-12 md:py-24">
+      <div className="mx-auto grid max-w-6xl items-center gap-8 md:gap-14 md:grid-cols-2">
         <ScrollReveal direction="left">
           <ScrollScrubVideo
             src="media/ramp-wheelchair.mp4"

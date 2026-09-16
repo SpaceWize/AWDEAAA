@@ -43,7 +43,7 @@ const steps = [
 const HowItWorks = () => (
   <section
     id="how-it-works"
-    className="relative overflow-hidden bg-[var(--color-mist)] px-6 py-24 md:px-12"
+    className="relative overflow-hidden bg-[var(--color-mist)] px-6 py-14 md:px-12 md:py-24"
   >
     <AmbientBackdrop />
 
@@ -74,18 +74,22 @@ const HowItWorks = () => (
               transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="relative sm:pl-20"
             >
-              <span
-                aria-hidden="true"
-                className="absolute left-0 top-4 hidden h-12 w-12 place-items-center rounded-full bg-[var(--color-brand)] text-lg font-extrabold tracking-tight text-white shadow-md shadow-violet-900/25 sm:grid"
-              >
-                {step.num}
-              </span>
-
               <motion.div
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.25 }}
                 className="rounded-2xl border border-[var(--color-brand)]/15 bg-[var(--color-paper)] p-6 shadow-sm transition-shadow duration-300 hover:shadow-xl md:p-8"
               >
+                {/* Lives inside the card so it is in normal flow on a phone,
+                    where there is no room for a rail beside it. From sm up it
+                    pins to the rail instead — the card's nearest positioned
+                    ancestor is the li, so it lands beside the card, not in it. */}
+                <span
+                  aria-hidden="true"
+                  className="mb-3 grid h-10 w-10 place-items-center rounded-full bg-[var(--color-brand)] text-base font-extrabold tracking-tight text-white shadow-md shadow-violet-900/25 sm:absolute sm:left-0 sm:top-4 sm:mb-0 sm:h-12 sm:w-12 sm:text-lg"
+                >
+                  {step.num}
+                </span>
+
                 <h3 className="mb-2 text-xl font-bold text-[var(--color-body-strong)]">
                   {/* The numeral is decorative; screen readers get the step
                       order from here instead, so it is never read as "zero
@@ -97,7 +101,7 @@ const HowItWorks = () => (
                   {step.description}
                 </p>
                 {step.note && (
-                  <p className="mt-3 text-sm text-[var(--color-body)]">{step.note}</p>
+                  <p className="mt-3 text-base text-[var(--color-body)] md:text-sm">{step.note}</p>
                 )}
               </motion.div>
             </motion.li>

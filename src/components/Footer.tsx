@@ -8,7 +8,7 @@ const Footer = () => (
     <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-3">
       <div>
         <h2 className="mb-4 text-lg font-bold">Contact us</h2>
-        <ul className="text-sm text-violet-100">
+        <ul className="text-base text-violet-100 md:text-sm">
           <li>
             <a href="tel:6048375616" className={footerLink}>
               604-837-5616
@@ -24,7 +24,7 @@ const Footer = () => (
       </div>
       <div>
         <h2 className="mb-4 text-lg font-bold">About us</h2>
-        <ul className="text-sm text-violet-100">
+        <ul className="text-base text-violet-100 md:text-sm">
           <li>
             <Link to="/bios" className={footerLink}>
               Our team
@@ -39,7 +39,7 @@ const Footer = () => (
       </div>
       <div>
         <h2 className="mb-4 text-lg font-bold">Join us</h2>
-        <ul className="text-sm text-violet-100">
+        <ul className="text-base text-violet-100 md:text-sm">
           <li>
             <Link to="/donate" className={footerLink}>
               Make a donation
