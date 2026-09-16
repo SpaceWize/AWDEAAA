@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import EventsCalendar from '../components/EventsCalendar';
 import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
-import ScrollScrubVideo from '../components/ScrollScrubVideo';
+import LoopingVideo from '../components/LoopingVideo';
 import ScrollReveal from '../components/ScrollReveal';
 import StaggerContainer, { staggerChild } from '../components/StaggerContainer';
 import { Link } from '../lib/router';
@@ -32,7 +32,7 @@ const Home = () => (
     <section id="about" className="bg-[var(--color-paper)] px-6 py-14 md:px-12 md:py-24">
       <div className="mx-auto grid max-w-6xl items-center gap-8 md:gap-14 md:grid-cols-2">
         <ScrollReveal direction="left">
-          <ScrollScrubVideo
+          <LoopingVideo
             src="media/about-conversation.mp4"
             poster="media/about-conversation-poster.jpg"
             label="People seated together in an accessible seating area at a live event, talking and smiling"
@@ -117,15 +117,12 @@ const Home = () => (
     <section className="bg-[var(--color-mist)] px-6 py-14 md:px-12 md:py-24">
       <div className="mx-auto grid max-w-6xl items-center gap-8 md:gap-14 md:grid-cols-2">
         <ScrollReveal direction="left">
-          <ScrollScrubVideo
+          <LoopingVideo
             src="media/ramp-wheelchair.mp4"
             poster="media/ramp-wheelchair-poster.jpg"
             label="A wheelchair user propelling themselves along a wooden boardwalk, gloved hand gripping the wheel rim"
             aspect="aspect-square"
             className="mx-auto w-full max-w-md"
-            // Last section on the page — the default range would leave the
-            // final third of the clip unreachable before the footer stops us.
-            endAt="center"
           />
         </ScrollReveal>
         <ScrollReveal direction="right" delay={0.15}>
