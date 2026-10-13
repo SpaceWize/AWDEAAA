@@ -124,3 +124,28 @@ h1, h2, h3, h4, p, li, dd, td, th {
     color: #000;
   }
 }
+
+/* The "exclusion." word turns white while the purple block is behind it and
+   back to ink once the block has left. Keyframe stops are the fractions of
+   the 16.4s cycle set in Hero.tsx: wipe in 0.7s (4.3%), hold 15s, wipe out
+   0.7s. Duration is set from Hero.tsx so the two can't drift apart. */
+@keyframes exclusion-ink {
+  0%, 100% { color: var(--color-body-strong); }
+  4.3%, 89.6% { color: #ffffff; }
+}
+
+.exclusion-word {
+  animation-name: exclusion-ink;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+/* Reduced motion: the block is simply present, so the word is simply white.
+   The global rule above shortens durations, which would otherwise leave the
+   word on its final, dark keyframe — so this one switches the animation off. */
+@media (prefers-reduced-motion: reduce) {
+  .exclusion-word {
+    animation: none !important;
+    color: #ffffff;
+  }
+}

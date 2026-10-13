@@ -1,14 +1,35 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Fragment } from 'react';
 import AmbientBackdrop from './AmbientBackdrop';
 import { Link } from '../lib/router';
 import { smoothScrollToId } from '../lib/smoothScroll';
 import { eyebrow, outlineButton, primaryButton } from '../lib/styles';
+import { useReducedMotion } from '../lib/useReducedMotion';
 
 const words = ['Entertainment', 'without', 'exclusion.'];
+const EASE_OUT = [0.16, 1, 0.3, 1] as const;
+
+// The highlight's timeline: wipe in, hold, wipe out to the other side.
+const WIPE_IN = 0.7;
+const HOLD = 15;
+const WIPE_OUT = 0.7;
+const TOTAL = WIPE_IN + HOLD + WIPE_OUT;
+const T_HOLD_START = WIPE_IN / TOTAL;
+const T_HOLD_END = (WIPE_IN + HOLD) / TOTAL;
+
 
 const Hero = () => {
-  const prefersReducedMotion = useReducedMotion();
+  const reduce = useReducedMotion();
+  // Under reduced motion every element starts in its final place, so nothing
+  // moves, appears, or waits on a timer. The content is identical either way.
+  const enter = (delay: number, distance: number, duration: number) =>
+    reduce
+      ? { initial: false as const, animate: { opacity: 1, y: 0 }, transition: { duration: 0 } }
+      : {
+          initial: { opacity: 0, y: distance },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration, delay, ease: EASE_OUT },
+        };
 
   return (
     <section
@@ -21,43 +42,67 @@ const Hero = () => {
           the page, and a hard left edge shared with the paragraph and buttons
           gives the eye one line to follow down instead of three centres. */}
       <div className="relative mx-auto w-full max-w-6xl">
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className={`mb-6 ${eyebrow}`}
-        >
+        <motion.p {...enter(0.1, 16, 0.6)} className={`mb-6 ${eyebrow}`}>
           Adults With Disabilities Entertainment Access
         </motion.p>
 
         {/* Fluid size: "Entertainment" is one long unbreakable word, so a fixed
             48px overflows a 320px viewport (WCAG 1.4.10 reflow). */}
         <h1 className="mb-8 max-w-4xl text-[clamp(2rem,8vw,5rem)] font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)]">
-          {words.map((word, i) => (
-            // The space after each word is real text, not CSS margin —
-            // otherwise the accessible name collapses to one run-on word.
-            <Fragment key={word}>
-              <motion.span
-                initial={{ opacity: 0, y: 48 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.9,
-                  delay: 0.2 + i * 0.12,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                className="inline-block"
-              >
-                {word}
-              </motion.span>
-              {i < words.length - 1 ? ' ' : ''}
-            </Fragment>
-          ))}
+          {words.map((word, i) => {
+            const last = i === words.length - 1;
+            return (
+              // The space after each word is real text, not CSS margin —
+              // otherwise the accessible name collapses to one run-on word.
+              <Fragment key={word}>
+                <motion.span {...enter(0.2 + i * 0.12, 48, 0.9)} className="relative inline-block">
+                  {last ? (
+                    // "exclusion." gets a purple block that wipes in from the
+                    // left, holds for 15 seconds, then wipes out to the right.
+                    // The text turns white while the block is behind it and
+                    // back to ink as it leaves, so it never disappears.
+                    // The text is real, so a screen reader still reads
+                    // "exclusion." — the block is decoration.
+                    <span
+                      className="exclusion-word relative isolate inline-block px-2"
+                      style={reduce ? undefined : { animationDuration: `${TOTAL}s` }}
+                    >
+                      <motion.span
+                        aria-hidden="true"
+                        initial={reduce ? false : { clipPath: 'inset(0 100% 0 0)' }}
+                        animate={
+                          reduce
+                            ? { clipPath: 'inset(0 0% 0 0)' }
+                            : {
+                                clipPath: [
+                                  'inset(0 100% 0 0)',
+                                  'inset(0 0% 0 0)',
+                                  'inset(0 0% 0 0)',
+                                  'inset(0 0% 0 100%)',
+                                ],
+                              }
+                        }
+                        transition={
+                          reduce
+                            ? { duration: 0 }
+                            : { duration: TOTAL, times: [0, T_HOLD_START, T_HOLD_END, 1], ease: 'easeInOut' }
+                        }
+                        className="absolute inset-0 -z-10 rounded-[0.18em] bg-[var(--color-brand)]"
+                      />
+                      {word}
+                    </span>
+                  ) : (
+                    word
+                  )}
+                </motion.span>
+                {i < words.length - 1 ? ' ' : ''}
+              </Fragment>
+            );
+          })}
         </h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
+          {...enter(0.6, 24, 0.7)}
           className="mb-10 max-w-2xl text-lg leading-relaxed text-[var(--color-body)] md:text-xl"
         >
           We connect disabled adults across British Columbia with free and discounted
@@ -65,9 +110,7 @@ const Hero = () => {
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.75 }}
+          {...enter(0.75, -28, 0.8)}
           // Full-width stacked buttons on a phone: two pills of different
           // widths left-aligned read as ragged, and a thumb-width target is
           // easier to hit than a 190px one.
@@ -89,7 +132,7 @@ const Hero = () => {
         </motion.div>
       </div>
 
-      {!prefersReducedMotion && (
+      {!reduce && (
         <motion.div
           aria-hidden="true"
           initial={{ opacity: 0 }}
