@@ -4,8 +4,10 @@ import { Link, useRouter } from '../lib/router';
 
 const navLinks = [
   { label: 'About Us', to: '/' },
+  { label: 'Gallery', to: '/gallery' },
   { label: 'Our Team', to: '/bios' },
   { label: 'Donors', to: '/donors' },
+  { label: 'My account', to: '/account' },
 ];
 
 const Navigation = () => {

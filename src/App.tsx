@@ -7,6 +7,8 @@ import Navigation from './components/Navigation';
 import { Link, useRouter } from './lib/router';
 import Donate from './pages/Donate';
 import Donors from './pages/Donors';
+import Account from './pages/Account';
+import Gallery from './pages/Gallery';
 import Home from './pages/Home';
 import OurTeam from './pages/OurTeam';
 
@@ -17,6 +19,8 @@ const routes: Record<string, { title: string; label: string; element: ReactNode 
     element: <Home />,
   },
   '/bios': { title: 'Our Team — AWDEA', label: 'Our team', element: <OurTeam /> },
+  '/gallery': { title: 'Gallery — AWDEA', label: 'Gallery', element: <Gallery /> },
+  '/account': { title: 'Your account — AWDEA', label: 'Your account', element: <Account /> },
   '/donate': {
     title: 'How to Donate — AWDEA',
     label: 'How to donate',
