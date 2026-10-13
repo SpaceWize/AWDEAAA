@@ -38,8 +38,8 @@ const Navigation = () => {
           <img
             src={`${import.meta.env.BASE_URL}awdea-logo.png`}
             alt="AWDEA home"
-            width={942}
-            height={265}
+            width={1024}
+            height={290}
             className="h-10 w-auto"
           />
           <span className="hidden text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-body)] sm:block">
