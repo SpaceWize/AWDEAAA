@@ -35,7 +35,8 @@
  *  again.
  *
  *  Image descriptions (the “alt” and “label” lines) are read aloud to people
- *  using screen readers. Please describe what is actually in the picture.
+ *  using screen readers. Edit these descriptions in the AWDEA Gallery Google 
+ *  Drive folder directly to prevent any unwanted bugs.
  * ============================================================================
  */
 
@@ -104,6 +105,8 @@ export const content = {
     headlineWords: ["Entertainment", "without", "exclusion."],
     paragraph:
       "Good Morning Everybody. Allow me to show you how to edit this!",
+    //ACTUAL TEXT:
+    //We connect disabled adults across British Columbia with free and discounted tickets to concerts, festivals, and sporting events.
     primaryButton: "Support our mission",
     secondaryButton: "See how it works",
     scrollHint: "Scroll to explore",
