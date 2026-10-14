@@ -104,7 +104,7 @@ export const content = {
     // between them and adds the purple highlight to the last one.
     headlineWords: ["Entertainment", "without", "exclusion."],
     paragraph:
-      "Good Morning Everybody. Allow me to show you how to edit this!",
+      "We connect disabled adults across British Columbia with free and discounted tickets to concerts, festivals, and sporting events.",
     //ACTUAL TEXT:
     //We connect disabled adults across British Columbia with free and discounted tickets to concerts, festivals, and sporting events.
     primaryButton: "Support our mission",
