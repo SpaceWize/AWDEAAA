@@ -43,6 +43,9 @@ jobs:
         env:
           VITE_GCAL_ID: ${{ secrets.VITE_GCAL_ID }}
           VITE_GCAL_KEY: ${{ secrets.VITE_GCAL_KEY }}
+          # The gallery reads a public Drive folder. Its ID is not sensitive, but
+          # it is kept as a secret so the site's configuration lives in one place.
+          VITE_GDRIVE_FOLDER: ${{ secrets.VITE_GDRIVE_FOLDER }}
         run: npm run build
 
       - uses: actions/configure-pages@v5
