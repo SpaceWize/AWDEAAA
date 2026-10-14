@@ -137,13 +137,6 @@ const Gallery = () => {
             </p>
           )}
 
-          {sample && (
-            <p className="mb-8 rounded-xl border-2 border-dashed border-[var(--color-brand)]/40 bg-[var(--color-mist)] p-4 text-base font-medium text-[var(--color-body)] md:text-sm">
-              Example photographs — placeholders until AWDEA’s photo folder is
-              connected.
-            </p>
-          )}
-
           {photos.length > 0 && (
             /*
              * Columns rather than a grid, so each photo keeps its own shape.
