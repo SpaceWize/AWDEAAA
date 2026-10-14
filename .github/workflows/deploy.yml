@@ -46,6 +46,9 @@ jobs:
           # The gallery reads a public Drive folder. Its ID is not sensitive, but
           # it is kept as a secret so the site's configuration lives in one place.
           VITE_GDRIVE_FOLDER: ${{ secrets.VITE_GDRIVE_FOLDER }}
+          # A separate key from the calendar's: a Google API key can be limited to
+          # particular APIs, and the calendar key is limited to Calendar only.
+          VITE_GDRIVE_KEY: ${{ secrets.VITE_GDRIVE_KEY }}
         run: npm run build
 
       - uses: actions/configure-pages@v5
