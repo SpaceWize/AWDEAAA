@@ -3,18 +3,10 @@ import AmbientBackdrop from '../components/AmbientBackdrop';
 import ImagePlaceholder from '../components/ImagePlaceholder';
 import ScrollReveal from '../components/ScrollReveal';
 import StaggerContainer, { staggerChild } from '../components/StaggerContainer';
+import { content } from '../content';
 import { eyebrow, primaryButton, sectionTitle } from '../lib/styles';
 
-const ways = [
-  {
-    title: 'Make a donation',
-    body: "Every contribution, big or small, makes a difference. Whether it's providing a single ticket to a local concert or funding an entire day out for a group, your donation is a step towards inclusivity.",
-  },
-  {
-    title: 'Spread the word',
-    body: 'Help us grow our impact by sharing our mission with your friends, family, and on social media. Awareness is key to our growth and success.',
-  },
-];
+const { matters, help, methods } = content.donate;
 
 const Donate = () => (
   <>
@@ -22,18 +14,17 @@ const Donate = () => (
       <AmbientBackdrop />
       <div className="relative mx-auto grid max-w-6xl items-center gap-8 md:gap-14 md:grid-cols-2">
         <ScrollReveal direction="left">
-          <p className={`mb-4 ${eyebrow}`}>Join us</p>
+          <p className={`mb-4 ${eyebrow}`}>{content.donate.eyebrow}</p>
           <h1 className="mb-6 text-5xl font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)] md:text-6xl">
-            Promoting inclusivity and joy with your help
+            {content.donate.heading}
           </h1>
           <p className="text-lg leading-relaxed text-[var(--color-body)]">
-            Your donation removes the barriers that keep disabled adults out of
-            the events the rest of us take for granted.
+            {content.donate.intro}
           </p>
         </ScrollReveal>
         <ScrollReveal direction="right" delay={0.15}>
           <ImagePlaceholder
-            label="Photo to come — AWDEA guests enjoying an event"
+            label={content.donate.imagePlaceholder}
             className="h-80 border-[var(--color-brand)]/40/70 bg-white md:h-96"
           />
         </ScrollReveal>
@@ -43,24 +34,11 @@ const Donate = () => (
     <section className="px-6 py-14 md:px-12 md:py-24">
       <div className="mx-auto max-w-3xl">
         <ScrollReveal>
-          <h2 className={`mb-8 ${sectionTitle}`}>Your donation matters</h2>
+          <h2 className={`mb-8 ${sectionTitle}`}>{matters.heading}</h2>
           <div className="flex flex-col gap-5 text-lg leading-relaxed text-[var(--color-body)]">
-            <p>
-              At AWDEA, we believe in a world where everyone, regardless of their
-              abilities, has the opportunity to experience the joy and community
-              spirit of public events and activities. Our initiative aims to
-              provide free tickets to disabled individuals, allowing them to enjoy
-              concerts, art exhibitions, sports games, and more, alongside their
-              friends and families.
-            </p>
-            <p>
-              Many individuals with disabilities face barriers that prevent them
-              from participating in events that many of us take for granted. These
-              can range from financial constraints to logistical challenges. Your
-              donation helps us remove these barriers by covering the costs of
-              tickets, ensuring everyone has an equal chance to enjoy these
-              experiences.
-            </p>
+            {matters.paragraphs.map((paragraph) => (
+              <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+            ))}
           </div>
         </ScrollReveal>
       </div>
@@ -70,11 +48,11 @@ const Donate = () => (
       <div className="mx-auto max-w-6xl">
         <ScrollReveal className="mb-14 max-w-2xl">
           <h2 className="text-4xl font-extrabold tracking-tight md:text-5xl">
-            How you can help
+            {help.heading}
           </h2>
         </ScrollReveal>
         <StaggerContainer className="grid gap-6 md:grid-cols-2">
-          {ways.map((way) => (
+          {help.cards.map((way) => (
             <motion.article
               key={way.title}
               variants={staggerChild}
@@ -94,44 +72,41 @@ const Donate = () => (
       <AmbientBackdrop />
       <div className="relative mx-auto max-w-3xl">
         <ScrollReveal>
-          <h2 className={`mb-8 ${sectionTitle}`}>Donation methods</h2>
+          <h2 className={`mb-8 ${sectionTitle}`}>{methods.heading}</h2>
           <p className="mb-8 text-lg leading-relaxed text-[var(--color-body)]">
-            We are currently accepting donations through Stripe. All proceeds will
-            be donated to AWDEA and used for providing tickets to accessible
-            events for adults with disabilities.
+            {methods.paragraph}
           </p>
 
           <a
-            href="https://buy.stripe.com/cN215g7UG1ip7UA144"
+            href={methods.stripeLink}
             className={primaryButton}
             rel="noopener"
           >
-            Donate through Stripe
+            {methods.stripeButton}
           </a>
 
           <div className="mt-14 rounded-3xl border border-[var(--color-brand)]/15 bg-[var(--color-mist)] p-8">
             <h3 className="mb-4 text-xl font-bold text-[var(--color-body-strong)]">
-              Donating tickets
+              {methods.ticketsHeading}
             </h3>
             <p className="mb-6 leading-relaxed text-[var(--color-body)]">
-              Have tickets you can’t use? We’d love to pass them on. Get in touch
-              with James and he’ll take it from there.
+              {methods.ticketsParagraph}
             </p>
             <ul className="flex flex-col gap-2 text-lg font-semibold">
               <li>
                 <a
-                  href="mailto:james@awdea.org"
+                  href={`mailto:${content.contact.email}`}
                   className="inline-flex min-h-11 items-center text-[var(--color-brand)] underline underline-offset-4 transition-colors duration-500 hover:text-[var(--color-brand-dark)]"
                 >
-                  james@awdea.org
+                  {content.contact.email}
                 </a>
               </li>
               <li>
                 <a
-                  href="tel:6048375616"
+                  href={`tel:${content.contact.phone.replace(/\D/g, '')}`}
                   className="inline-flex min-h-11 items-center text-[var(--color-brand)] underline underline-offset-4 transition-colors duration-500 hover:text-[var(--color-brand-dark)]"
                 >
-                  604-837-5616
+                  {content.contact.phone}
                 </a>
               </li>
             </ul>

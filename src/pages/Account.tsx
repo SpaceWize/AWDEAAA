@@ -2,7 +2,10 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useAccount } from '../lib/AccountContext';
 import { accounts, hasErrors, validate, type FieldErrors, type Member } from '../lib/accounts';
+import { content } from '../content';
 import { eyebrow, primaryButton, sectionTitle } from '../lib/styles';
+
+const copy = content.account;
 
 const fieldClass =
   'mt-2 w-full min-h-12 rounded-xl border-2 border-[var(--color-brand)]/30 bg-[var(--color-paper)] px-4 text-base text-[var(--color-body-strong)] focus:border-[var(--color-brand)] focus:outline-none';
@@ -32,7 +35,7 @@ const MemberFields = ({
         Name or username
       </label>
       <p id="member-name-hint" className={hintClass}>
-        What you would like us to call you. Your full name is fine, and so is a nickname.
+        {copy.nameHint}
       </p>
       <input
         id="member-name"
@@ -57,7 +60,7 @@ const MemberFields = ({
         Email address
       </label>
       <p id="member-email-hint" className={hintClass}>
-        Optional if you give a phone number.
+        {copy.emailHint}
       </p>
       <input
         id="member-email"
@@ -84,7 +87,7 @@ const MemberFields = ({
         Phone number
       </label>
       <p id="member-phone-hint" className={hintClass}>
-        Optional if you give an email. Include the area code.
+        {copy.phoneHint}
       </p>
       <input
         id="member-phone"
@@ -229,7 +232,7 @@ const SignedOut = ({ onChange }: { onChange: () => Promise<void> }) => {
               Email address
             </label>
             <p id="signin-email-hint" className={hintClass}>
-              The email you used when you created your account.
+              {copy.signInEmailHint}
             </p>
             <input
               id="signin-email"
@@ -330,9 +333,9 @@ const SignedIn = ({ member, onChange }: { member: Member; onChange: () => Promis
       </form>
 
       <div className="mt-12 border-t border-[var(--color-brand)]/20 pt-8">
-        <h3 className="mb-4 text-xl font-bold text-[var(--color-body-strong)]">Sign out</h3>
+        <h3 className="mb-4 text-xl font-bold text-[var(--color-body-strong)]">{copy.signOutHeading}</h3>
         <p className="mb-4 text-base text-[var(--color-body)]">
-          Signs this browser out. Your details stay saved on this device.
+          {copy.signOutText}
         </p>
         <button
           type="button"
@@ -345,9 +348,9 @@ const SignedIn = ({ member, onChange }: { member: Member; onChange: () => Promis
       </div>
 
       <div className="mt-12 border-t border-[var(--color-brand)]/20 pt-8">
-        <h3 className="mb-4 text-xl font-bold text-[var(--color-body-strong)]">Delete my account</h3>
+        <h3 className="mb-4 text-xl font-bold text-[var(--color-body-strong)]">{copy.deleteHeading}</h3>
         <p className="mb-4 text-base text-[var(--color-body)]">
-          This removes your name, email, phone number and raffle entries from this device. It cannot be undone.
+          {copy.deleteText}
         </p>
         {!confirmDelete ? (
           <button
@@ -361,7 +364,7 @@ const SignedIn = ({ member, onChange }: { member: Member; onChange: () => Promis
         ) : (
           <div role="group" aria-label="Confirm deleting your account" className="rounded-2xl border-2 border-red-800/40 bg-red-50 p-5">
             <p className="mb-4 text-base font-semibold text-red-900">
-              Are you sure? Your account and details will be deleted.
+              {copy.deleteConfirm}
             </p>
             <div className="flex flex-wrap gap-3">
               <button
@@ -394,13 +397,12 @@ const Account = () => {
     <>
       <section className="relative overflow-hidden bg-[var(--color-mist)] px-6 pt-32 pb-14 md:px-12 md:pt-40 md:pb-20">
         <div className="relative mx-auto max-w-2xl">
-          <p className={`mb-4 ${eyebrow}`}>Members</p>
+          <p className={`mb-4 ${eyebrow}`}>{copy.eyebrow}</p>
           <h1 className="mb-6 text-[clamp(2rem,7vw,4rem)] font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)]">
-            Your account
+            {copy.heading}
           </h1>
           <p className="text-lg leading-relaxed text-[var(--color-body)]">
-            Create an account to keep your details with AWDEA. You only need an email address or a phone
-            number, and you can give both.
+            {copy.intro}
           </p>
         </div>
       </section>
@@ -408,7 +410,7 @@ const Account = () => {
       <section className="bg-[var(--color-paper)] px-6 py-14 md:px-12 md:py-20" aria-labelledby="account-heading">
         <div className="mx-auto max-w-2xl">
           <h2 id="account-heading" className={`mb-8 ${sectionTitle}`}>
-            {member ? 'Your details' : 'Join AWDEA'}
+            {member ? copy.headingSignedIn : copy.headingSignedOut}
           </h2>
 
           {/* Announced, so a screen reader user is told the page has settled
@@ -426,12 +428,11 @@ const Account = () => {
           )}
 
           <div className="mt-16 rounded-2xl border border-[var(--color-brand)]/20 bg-[var(--color-mist)] p-6">
-            <h3 className="mb-3 text-lg font-bold text-[var(--color-body-strong)]">How we look after your details</h3>
+            <h3 className="mb-3 text-lg font-bold text-[var(--color-body-strong)]">{copy.privacyHeading}</h3>
             <ul className="list-disc space-y-2 pl-5 text-base leading-relaxed text-[var(--color-body)]">
-              <li>We only ask for what we need: a name or username, and an email or phone number.</li>
-              <li>We do not ask for anything about your disability.</li>
-              <li>Credit card payments are handled by Stripe. Card details never reach AWDEA.</li>
-              <li>You can change or delete your details at any time from this page.</li>
+              {copy.privacyPoints.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
             </ul>
           </div>
         </div>

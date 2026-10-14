@@ -2,30 +2,23 @@ import { motion } from 'framer-motion';
 import ScrollReveal from '../components/ScrollReveal';
 import StaggerContainer, { staggerChild } from '../components/StaggerContainer';
 import { Link } from '../lib/router';
+import { content } from '../content';
 import { eyebrow, primaryButton, sectionTitle } from '../lib/styles';
 
-const donors = [
-  { name: 'Nick', date: 'Wed Sep 24 2025', amount: '$50' },
-  { name: 'Nick', date: 'Wed May 14 2025', amount: '$25' },
-  { name: 'GOODWIN VENTURES CORP', date: 'Sat Mar 15 2025', amount: '$500' },
-  { name: 'Keon Kirby', date: 'Wed Jun 12 2024', amount: '$100' },
-  { name: 'Anonymous donation', date: 'Wed May 29 2024', amount: '$1000' },
-];
+const { donors: page } = content;
+const donors = page.list;
 
 const Donors = () => (
   <>
     <section className="bg-[var(--color-mist)] px-6 pt-36 pb-20 md:px-12">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal>
-          <p className={`mb-4 ${eyebrow}`}>Our donors</p>
+          <p className={`mb-4 ${eyebrow}`}>{page.eyebrow}</p>
           <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-[var(--color-body-strong)] md:text-6xl">
-            Thank you!
+            {page.heading}
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-[var(--color-body)]">
-            Thank you to all our donors for your generous contributions. Each
-            donation helps us make a difference in our community. Your support is
-            vital to our success and is deeply appreciated by everyone impacted by
-            your generosity.
+            {page.intro}
           </p>
         </ScrollReveal>
       </div>
@@ -34,7 +27,7 @@ const Donors = () => (
     <section className="px-6 py-14 md:px-12 md:py-24">
       <div className="mx-auto max-w-4xl">
         <ScrollReveal className="mb-10">
-          <h2 className={sectionTitle}>Our donors</h2>
+          <h2 className={sectionTitle}>{page.listHeading}</h2>
         </ScrollReveal>
 
         {/* Card list on small screens, table on wide screens. */}
@@ -59,18 +52,18 @@ const Donors = () => (
           <div className="overflow-x-auto rounded-2xl border border-[var(--color-brand)]/15">
             <table className="w-full border-collapse text-left">
               <caption className="sr-only">
-                AWDEA donors, with donation date and amount
+                {page.tableCaption}
               </caption>
               <thead className="bg-[var(--color-mist)]">
                 <tr>
                   <th scope="col" className="px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-body)]">
-                    Name
+                    {page.columnName}
                   </th>
                   <th scope="col" className="px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-body)]">
-                    Date
+                    {page.columnDate}
                   </th>
                   <th scope="col" className="px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-body)]">
-                    Amount / Item
+                    {page.columnAmount}
                   </th>
                 </tr>
               </thead>
@@ -100,14 +93,13 @@ const Donors = () => (
       <div className="mx-auto max-w-3xl text-center">
         <ScrollReveal>
           <h2 className="mb-6 text-4xl font-extrabold tracking-tight md:text-5xl">
-            Add your name
+            {page.callToAction.heading}
           </h2>
           <p className="mb-10 text-lg leading-relaxed text-violet-100">
-            Donations of any size go directly towards tickets for disabled adults
-            across the Lower Mainland.
+            {page.callToAction.paragraph}
           </p>
           <Link to="/donate" className={primaryButton}>
-            How to donate
+            {page.callToAction.button}
           </Link>
         </ScrollReveal>
       </div>

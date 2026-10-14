@@ -10,6 +10,8 @@ import {
   samplePhotos,
   type Photo,
 } from '../lib/gallery';
+import { content } from '../content';
+import { fill } from '../lib/fill';
 import { eyebrow, sectionTitle } from '../lib/styles';
 
 type State =
@@ -20,6 +22,8 @@ type State =
 /** Grid thumbnails are small on purpose; the enlarged view asks for a big one. */
 const THUMB_WIDTH = 600;
 const FULL_WIDTH = 1600;
+
+const copy = content.gallery;
 
 const Gallery = () => {
   const [state, setState] = useState<State>({ status: 'loading' });
@@ -85,13 +89,12 @@ const Gallery = () => {
         <AmbientBackdrop />
         <div className="relative mx-auto max-w-5xl">
           <ScrollReveal>
-            <p className={`mb-4 ${eyebrow}`}>Gallery</p>
+            <p className={`mb-4 ${eyebrow}`}>{copy.eyebrow}</p>
             <h1 className="mb-6 text-[clamp(2rem,7vw,4rem)] font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)]">
-              Nights out, together.
+              {copy.heading}
             </h1>
             <p className="max-w-2xl text-lg leading-relaxed text-[var(--color-body)]">
-              Photographs from events our members have been to. Each one is
-              shown in full — select any photo to see it larger.
+              {copy.intro}
             </p>
           </ScrollReveal>
         </div>
@@ -103,37 +106,36 @@ const Gallery = () => {
       >
         <div className="mx-auto max-w-5xl">
           <h2 id="gallery-heading" className={`sr-only ${sectionTitle}`}>
-            Photographs
+            {copy.photosHeading}
           </h2>
 
           {/* Announced rather than only shown, so a screen reader user is told
               the photos arrived instead of meeting silence. */}
           <p aria-live="polite" className="sr-only">
-            {state.status === 'loading' && 'Loading photographs.'}
+            {state.status === 'loading' && copy.loadingAnnouncement}
             {state.status === 'ready' &&
-              `${photos.length} photograph${photos.length === 1 ? '' : 's'} shown.`}
-            {state.status === 'error' && 'Photographs could not be loaded.'}
+              fill(photos.length === 1 ? copy.countOne : copy.countMany, { n: photos.length })}
+            {state.status === 'error' && copy.errorAnnouncement}
           </p>
 
           {state.status === 'loading' && (
-            <p className="text-lg text-[var(--color-body)]">Loading photographs…</p>
+            <p className="text-lg text-[var(--color-body)]">{copy.loading}</p>
           )}
 
           {state.status === 'error' && (
             <div className="rounded-2xl border-2 border-[var(--color-brand)]/25 bg-[var(--color-mist)] p-8">
               <p className="mb-2 text-lg font-semibold text-[var(--color-body-strong)]">
-                We couldn’t load the photographs just now.
+                {copy.errorHeading}
               </p>
               <p className="text-[var(--color-body)]">
-                Please try again shortly, or call 604-837-5616 if you need
-                anything from this page.
+                {copy.errorBody}
               </p>
             </div>
           )}
 
           {state.status === 'ready' && photos.length === 0 && (
             <p className="text-lg text-[var(--color-body)]">
-              There are no photographs here yet. Check back soon.
+              {copy.empty}
             </p>
           )}
 
@@ -179,7 +181,7 @@ const Gallery = () => {
                         screen reader what pressing the button will do, which
                         the alt text alone does not. */}
                     <span className="sr-only">
-                      {`Enlarge photograph ${index + 1} of ${photos.length}`}
+                      {fill(copy.enlargeLabel, { n: index + 1, total: photos.length })}
                     </span>
                   </button>
                 </li>
@@ -193,7 +195,7 @@ const Gallery = () => {
         ref={dialogRef}
         onClose={() => setOpenAt(null)}
         onKeyDown={onDialogKeyDown}
-        aria-label="Enlarged photograph"
+        aria-label={copy.dialogLabel}
         className="max-h-[92vh] w-[min(92vw,70rem)] max-w-none rounded-3xl bg-[var(--color-paper)] p-0 backdrop:bg-black/70 backdrop:backdrop-blur-sm"
       >
         {current && (
@@ -207,7 +209,7 @@ const Gallery = () => {
             <div className="flex flex-wrap items-center justify-between gap-3 p-4 md:p-5">
               <p className="min-w-0 flex-1 text-base leading-relaxed text-[var(--color-body)]">
                 {current.description ?? (
-                  <span className="italic">No description has been added for this photograph.</span>
+                  <span className="italic">{copy.noDescription}</span>
                 )}
               </p>
 
@@ -220,7 +222,7 @@ const Gallery = () => {
                   onClick={() => step(-1)}
                   className="grid h-11 w-11 place-items-center rounded-full border-2 border-[var(--color-brand)]/30 text-[var(--color-brand-deep)] hover:bg-[var(--color-mist)]"
                 >
-                  <span className="sr-only">Previous photograph</span>
+                  <span className="sr-only">{copy.previous}</span>
                   <svg aria-hidden="true" width="12" height="16" viewBox="0 0 12 16" fill="none" stroke="currentColor" strokeWidth="2.2">
                     <path d="M9 1 3 8l6 7" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -230,7 +232,7 @@ const Gallery = () => {
                   onClick={() => step(1)}
                   className="grid h-11 w-11 place-items-center rounded-full border-2 border-[var(--color-brand)]/30 text-[var(--color-brand-deep)] hover:bg-[var(--color-mist)]"
                 >
-                  <span className="sr-only">Next photograph</span>
+                  <span className="sr-only">{copy.next}</span>
                   <svg aria-hidden="true" width="12" height="16" viewBox="0 0 12 16" fill="none" stroke="currentColor" strokeWidth="2.2">
                     <path d="m3 1 6 7-6 7" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -240,7 +242,7 @@ const Gallery = () => {
                   onClick={() => setOpenAt(null)}
                   className="min-h-11 rounded-full bg-[var(--color-brand)] px-5 font-semibold text-white hover:bg-[var(--color-brand-dark)]"
                 >
-                  Close
+                  {copy.close}
                 </button>
               </div>
             </div>

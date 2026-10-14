@@ -11,6 +11,8 @@ import {
   sampleEvents,
   type CalendarEvent,
 } from '../lib/calendar';
+import { content } from '../content';
+import { fill } from '../lib/fill';
 import { sectionTitle } from '../lib/styles';
 
 type State =
@@ -48,6 +50,7 @@ const EventsCalendar = () => {
     return () => controller.abort();
   }, []);
 
+  const copy = content.events;
   const months = state.status === 'ready' ? groupByMonth(state.events) : [];
 
   return (
@@ -59,48 +62,48 @@ const EventsCalendar = () => {
       <div className="mx-auto max-w-4xl">
         <ScrollReveal className="mb-12">
           <h2 id="events-heading" className={`mb-4 ${sectionTitle}`}>
-            Upcoming events
+            {copy.heading}
           </h2>
           <p className="text-lg leading-relaxed text-[var(--color-body)]">
-            Draws happen two weeks before each event date. All times are Pacific.
+            {copy.intro}
           </p>
         </ScrollReveal>
 
         {/* Status is announced rather than only shown, so a screen reader user
             is told the list arrived instead of meeting silence. */}
         <p aria-live="polite" className="sr-only">
-          {state.status === 'loading' && 'Loading upcoming events.'}
+          {state.status === 'loading' && copy.loadingAnnouncement}
           {state.status === 'ready' &&
-            `${state.events.length} upcoming event${state.events.length === 1 ? '' : 's'} listed.`}
-          {state.status === 'error' && 'Upcoming events could not be loaded.'}
+            fill(state.events.length === 1 ? copy.countOne : copy.countMany, {
+              n: state.events.length,
+            })}
+          {state.status === 'error' && copy.errorAnnouncement}
         </p>
 
         {state.status === 'loading' && (
-          <p className="text-lg text-[var(--color-body)]">Loading upcoming events…</p>
+          <p className="text-lg text-[var(--color-body)]">{copy.loading}</p>
         )}
 
         {state.status === 'error' && (
           <div className="rounded-2xl border-2 border-[var(--color-brand)]/25 bg-[var(--color-mist)] p-8">
             <p className="mb-2 text-lg font-semibold text-[var(--color-body-strong)]">
-              We couldn’t load the events list just now.
+              {copy.errorHeading}
             </p>
             <p className="text-[var(--color-body)]">
-              Please try again shortly, or call 604-837-5616 and we’ll tell you
-              what’s coming up.
+              {copy.errorBody}
             </p>
           </div>
         )}
 
         {state.status === 'ready' && state.events.length === 0 && (
           <p className="text-lg text-[var(--color-body)]">
-            No events are scheduled at the moment. Check back soon.
+            {copy.empty}
           </p>
         )}
 
         {state.status === 'ready' && state.sample && (
           <p className="mb-8 rounded-xl border-2 border-dashed border-[var(--color-brand)]/40 bg-[var(--color-mist)] p-4 text-sm font-medium text-[var(--color-body)]">
-            Example events — these are placeholders until AWDEA’s calendar is
-            connected.
+            {copy.sampleNotice}
           </p>
         )}
 
@@ -142,9 +145,9 @@ const EventsCalendar = () => {
                           names the event — a screen reader user listing links
                           would otherwise hear "add to calendar" four times
                           with no way to tell them apart. */}
-                      <span aria-hidden="true">Add to my calendar</span>
+                      <span aria-hidden="true">{copy.addToCalendar}</span>
                       <span className="sr-only">
-                        {`Add ${event.title} to my calendar (opens in a new tab)`}
+                        {fill(copy.addToCalendarFull, { title: event.title })}
                       </span>
                     </a>
                   )}
@@ -154,7 +157,7 @@ const EventsCalendar = () => {
           </ScrollReveal>
         ))}
 
-        <p className="sr-only">All event times are in the {EVENT_TIMEZONE} timezone.</p>
+        <p className="sr-only">{fill(copy.timezoneAnnouncement, { timezone: EVENT_TIMEZONE })}</p>
       </div>
     </section>
   );

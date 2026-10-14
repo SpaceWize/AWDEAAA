@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import BackToTop from './components/BackToTop';
 import Footer from './components/Footer';
 import Navigation from './components/Navigation';
+import { content } from './content';
+import { fill } from './lib/fill';
 import { Link, useRouter } from './lib/router';
 import Donate from './pages/Donate';
 import Donors from './pages/Donors';
@@ -12,39 +14,29 @@ import Gallery from './pages/Gallery';
 import Home from './pages/Home';
 import OurTeam from './pages/OurTeam';
 
+const { pages } = content;
+
 const routes: Record<string, { title: string; label: string; element: ReactNode }> = {
-  '/': {
-    title: 'AWDEA — Accessible Entertainment for All',
-    label: 'Home',
-    element: <Home />,
-  },
-  '/bios': { title: 'Our Team — AWDEA', label: 'Our team', element: <OurTeam /> },
-  '/gallery': { title: 'Gallery — AWDEA', label: 'Gallery', element: <Gallery /> },
-  '/account': { title: 'Your account — AWDEA', label: 'Your account', element: <Account /> },
-  '/donate': {
-    title: 'How to Donate — AWDEA',
-    label: 'How to donate',
-    element: <Donate />,
-  },
-  '/donors': {
-    title: 'Our Donors — AWDEA',
-    label: 'Our donors',
-    element: <Donors />,
-  },
+  '/': { title: pages.home.title, label: pages.home.name, element: <Home /> },
+  '/bios': { title: pages.team.title, label: pages.team.name, element: <OurTeam /> },
+  '/gallery': { title: pages.gallery.title, label: pages.gallery.name, element: <Gallery /> },
+  '/account': { title: pages.account.title, label: pages.account.name, element: <Account /> },
+  '/donate': { title: pages.donate.title, label: pages.donate.name, element: <Donate /> },
+  '/donors': { title: pages.donors.title, label: pages.donors.name, element: <Donors /> },
 };
 
 const NotFound = () => (
   <section className="grid min-h-[100svh] place-items-center px-6 pt-24">
     <div className="text-center">
       <h1 className="mb-4 text-5xl font-extrabold tracking-tight text-[var(--color-body-strong)]">
-        Page not found
+        {content.notFound.heading}
       </h1>
-      <p className="mb-8 text-lg text-[var(--color-body)]">That page doesn’t exist yet.</p>
+      <p className="mb-8 text-lg text-[var(--color-body)]">{content.notFound.paragraph}</p>
       <Link
         to="/"
         className="inline-grid min-h-12 place-items-center rounded-full bg-[var(--color-brand)] px-8 font-semibold text-white"
       >
-        Back to home
+        {content.notFound.button}
       </Link>
     </div>
   </section>
@@ -61,7 +53,7 @@ const App = () => {
   const [announcement, setAnnouncement] = useState('');
 
   useEffect(() => {
-    document.title = route?.title ?? 'Page not found — AWDEA';
+    document.title = route?.title ?? pages.notFound.title;
 
     // Don't steal focus or announce on the initial load.
     if (isFirstRender.current) {
@@ -69,7 +61,9 @@ const App = () => {
       return;
     }
 
-    setAnnouncement(`${route?.label ?? 'Page not found'} page loaded`);
+    setAnnouncement(
+      fill(pages.loadedAnnouncement, { name: route?.label ?? pages.notFound.name }),
+    );
     // Move focus to the top of the new page so keyboard users continue from
     // there rather than from wherever the old page's link used to be.
     mainRef.current?.focus();
@@ -78,7 +72,7 @@ const App = () => {
   return (
     <>
       <a href="#main" className="skip-link">
-        Skip to main content
+        {content.site.skipLink}
       </a>
 
       <Navigation />

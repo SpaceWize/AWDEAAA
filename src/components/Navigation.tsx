@@ -1,14 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { content } from '../content';
 import { Link, useRouter } from '../lib/router';
 
-const navLinks = [
-  { label: 'About Us', to: '/' },
-  { label: 'Gallery', to: '/gallery' },
-  { label: 'Our Team', to: '/bios' },
-  { label: 'Donors', to: '/donors' },
-  { label: 'My account', to: '/account' },
-];
+const { nav } = content;
+const navLinks = nav.links;
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,17 +33,17 @@ const Navigation = () => {
               so the masthead can't break if that host moves the file. */}
           <img
             src={`${import.meta.env.BASE_URL}awdea-logo.png`}
-            alt="AWDEA home"
+            alt={nav.logoAlt}
             width={1024}
             height={290}
             className="h-10 w-auto"
           />
           <span className="hidden text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-body)] sm:block">
-            Entertainment Access
+            {nav.tagline}
           </span>
         </Link>
 
-        <nav aria-label="Main menu" className="hidden items-center gap-8 md:flex">
+        <nav aria-label={nav.mainMenuLabel} className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.label}
@@ -66,7 +62,7 @@ const Navigation = () => {
             to="/donate"
             className="min-h-11 rounded-full bg-[var(--color-brand)] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-900/20 transition-colors duration-500 hover:bg-[var(--color-brand-dark)]"
           >
-            Donate
+            {nav.donateButton}
           </Link>
         </nav>
 
@@ -75,7 +71,7 @@ const Navigation = () => {
           onClick={() => setIsOpen((v) => !v)}
           aria-expanded={isOpen}
           aria-controls="mobile-menu"
-          aria-label={isOpen ? 'Close main menu' : 'Open main menu'}
+          aria-label={isOpen ? nav.closeMenuLabel : nav.openMenuLabel}
           className="grid h-11 w-11 place-items-center md:hidden"
         >
           <span className="flex h-4 w-6 flex-col justify-between">
@@ -102,7 +98,7 @@ const Navigation = () => {
         {isOpen && (
           <motion.nav
             id="mobile-menu"
-            aria-label="Mobile menu"
+            aria-label={nav.mobileMenuLabel}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -126,7 +122,7 @@ const Navigation = () => {
                 onClick={() => setIsOpen(false)}
                 className="mt-2 grid min-h-12 place-items-center rounded-full bg-[var(--color-brand)] px-6 text-base font-semibold text-white"
               >
-                Donate
+                {nav.donateButton}
               </Link>
             </div>
           </motion.nav>

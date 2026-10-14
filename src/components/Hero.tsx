@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion';
 import { Fragment } from 'react';
 import AmbientBackdrop from './AmbientBackdrop';
+import { content } from '../content';
 import { Link } from '../lib/router';
 import { smoothScrollToId } from '../lib/smoothScroll';
 import { eyebrow, outlineButton, primaryButton } from '../lib/styles';
 import { useReducedMotion } from '../lib/useReducedMotion';
 
-const words = ['Entertainment', 'without', 'exclusion.'];
+const words = content.hero.headlineWords;
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
 // The highlight's timeline: wipe in, hold, wipe out to the other side.
@@ -43,7 +44,7 @@ const Hero = () => {
           gives the eye one line to follow down instead of three centres. */}
       <div className="relative mx-auto w-full max-w-6xl">
         <motion.p {...enter(0.1, 16, 0.6)} className={`mb-6 ${eyebrow}`}>
-          Adults With Disabilities Entertainment Access
+          {content.hero.eyebrow}
         </motion.p>
 
         {/* Fluid size: "Entertainment" is one long unbreakable word, so a fixed
@@ -105,8 +106,7 @@ const Hero = () => {
           {...enter(0.6, 24, 0.7)}
           className="mb-10 max-w-2xl text-lg leading-relaxed text-[var(--color-body)] md:text-xl"
         >
-          We connect disabled adults across British Columbia with free and discounted
-          tickets to concerts, festivals, and sporting events.
+          {content.hero.paragraph}
         </motion.p>
 
         <motion.div
@@ -117,7 +117,7 @@ const Hero = () => {
           className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4"
         >
           <Link to="/donate" className={`${primaryButton} w-full sm:w-auto`}>
-            Support our mission
+            {content.hero.primaryButton}
           </Link>
           <a
             href="#how-it-works"
@@ -127,7 +127,7 @@ const Hero = () => {
             }}
             className={`${outlineButton} w-full sm:w-auto`}
           >
-            See how it works
+            {content.hero.secondaryButton}
           </a>
         </motion.div>
       </div>
@@ -141,7 +141,7 @@ const Hero = () => {
           className="absolute bottom-10 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 md:flex"
         >
           <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-body)]">
-            Scroll to explore
+            {content.hero.scrollHint}
           </span>
           <span className="grid h-10 w-6 place-items-start rounded-full border-2 border-[var(--color-body)]/50 pt-2">
             <motion.span

@@ -2,32 +2,11 @@ import { motion } from 'framer-motion';
 import AmbientBackdrop from './AmbientBackdrop';
 import ScrollReveal from './ScrollReveal';
 import StaggerContainer, { staggerChild } from './StaggerContainer';
+import { content } from '../content';
+import { fill } from '../lib/fill';
 import { eyebrow } from '../lib/styles';
 
-const steps = [
-  {
-    num: '01',
-    title: 'Sign Up',
-    description: 'Create your free AWDEA account.',
-    note: 'Eligibility is restricted to disabled adults aged 19+.',
-  },
-  {
-    num: '02',
-    title: 'Register for an Event',
-    description: "Browse what's available on the Raffle Events page and enter.",
-  },
-  {
-    num: '03',
-    title: 'Wait for the Raffle',
-    description: 'Draws happen two weeks before each event date.',
-  },
-  {
-    num: '04',
-    title: 'Receive Your Tickets',
-    description:
-      'Winners get an email with their tickets roughly two weeks before the event.',
-  },
-];
+const { steps } = content.howItWorks;
 
 /**
  * A vertical timeline of cards.
@@ -49,12 +28,12 @@ const HowItWorks = () => (
 
     <div className="relative mx-auto max-w-4xl">
       <ScrollReveal className="mb-16 text-center">
-        <p className={`mb-4 ${eyebrow}`}>Coming soon</p>
+        <p className={`mb-4 ${eyebrow}`}>{content.howItWorks.eyebrow}</p>
         <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-[var(--color-body-strong)] md:text-5xl">
-          How it works
+          {content.howItWorks.heading}
         </h2>
         <p className="mx-auto max-w-2xl text-lg text-[var(--color-body)]">
-          Four steps between you and a night out.
+          {content.howItWorks.intro}
         </p>
       </ScrollReveal>
 
@@ -94,7 +73,7 @@ const HowItWorks = () => (
                   {/* The numeral is decorative; screen readers get the step
                       order from here instead, so it is never read as "zero
                       one" or skipped entirely. */}
-                  <span className="sr-only">{`Step ${idx + 1} of ${steps.length}: `}</span>
+                  <span className="sr-only">{fill(content.howItWorks.stepAnnouncement, { number: idx + 1, total: steps.length })}</span>
                   {step.title}
                 </h3>
                 <p className="text-base leading-relaxed text-[var(--color-body)]">

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { content } from '../content';
 import { smoothScrollTo } from '../lib/smoothScroll';
 
 const BackToTop = () => {
@@ -18,7 +19,7 @@ const BackToTop = () => {
         <motion.button
           type="button"
           onClick={() => smoothScrollTo(0, 1500)}
-          aria-label="Back to top"
+          aria-label={content.site.backToTop}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 16 }}
