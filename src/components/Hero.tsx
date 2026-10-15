@@ -4,7 +4,7 @@ import AmbientBackdrop from './AmbientBackdrop';
 import { content } from '../content';
 import { Link } from '../lib/router';
 import { smoothScrollToId } from '../lib/smoothScroll';
-import { eyebrow, outlineButton, primaryButton } from '../lib/styles';
+import { outlineButton, primaryButton } from '../lib/styles';
 import { useReducedMotion } from '../lib/useReducedMotion';
 
 const words = content.hero.headlineWords;
@@ -43,13 +43,13 @@ const Hero = () => {
           the page, and a hard left edge shared with the paragraph and buttons
           gives the eye one line to follow down instead of three centres. */}
       <div className="relative mx-auto w-full max-w-6xl">
-        <motion.p {...enter(0.1, 16, 0.6)} className={`mb-6 ${eyebrow}`}>
+        <motion.p {...enter(0.1, 16, 0.6)} className="mb-6 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-brand-deep)] md:text-base">
           {content.hero.eyebrow}
         </motion.p>
 
         {/* Fluid size: "Entertainment" is one long unbreakable word, so a fixed
             48px overflows a 320px viewport (WCAG 1.4.10 reflow). */}
-        <h1 className="mb-8 max-w-4xl text-[clamp(2rem,8vw,5rem)] font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)]">
+        <h1 className="mb-8 max-w-4xl text-[clamp(1.75rem,7vw,4.25rem)] font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)]">
           {words.map((word, i) => {
             const last = i === words.length - 1;
             return (
