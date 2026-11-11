@@ -1,11 +1,17 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useAccount } from '../lib/AccountContext';
 import { accounts, hasErrors, validate, type FieldErrors, type Member } from '../lib/accounts';
 import { content } from '../content';
+import WaitlistGate from '../components/WaitlistGate';
+import { fill } from '../lib/fill';
 import { eyebrow, primaryButton, sectionTitle } from '../lib/styles';
 
 const copy = content.account;
+// Server mode swaps in its own wording where it differs (sign-in by emailed
+// code, data held by AWDEA rather than on this device). Both branches carry
+// every key, so either mode can read any of them.
+const t = accounts.requiresEmail ? { ...copy, ...copy.cloud } : { ...copy.cloud, ...copy };
 
 const fieldClass =
   'mt-2 w-full min-h-12 rounded-xl border-2 border-[var(--color-brand)]/30 bg-[var(--color-paper)] px-4 text-base text-[var(--color-body-strong)] focus:border-[var(--color-brand)] focus:outline-none';
@@ -24,10 +30,13 @@ const MemberFields = ({
   defaults,
   errors,
   disabled,
+  emailLocked,
 }: {
   defaults?: Partial<Member>;
   errors: FieldErrors;
   disabled?: boolean;
+  /** The address is where sign-in codes go, so it cannot be edited here. */
+  emailLocked?: boolean;
 }) => (
   <>
     <div className="mb-6">
@@ -60,7 +69,7 @@ const MemberFields = ({
         Email address
       </label>
       <p id="member-email-hint" className={hintClass}>
-        {copy.emailHint}
+        {emailLocked ? t.emailLockedHint : t.emailHint}
       </p>
       <input
         id="member-email"
@@ -71,6 +80,8 @@ const MemberFields = ({
         spellCheck={false}
         defaultValue={defaults?.email ?? ''}
         disabled={disabled}
+        readOnly={emailLocked}
+        aria-readonly={emailLocked || undefined}
         aria-describedby={`member-email-hint${errors.email ? ' member-email-error' : ''}`}
         aria-invalid={!!errors.email}
         className={fieldClass}
@@ -87,7 +98,7 @@ const MemberFields = ({
         Phone number
       </label>
       <p id="member-phone-hint" className={hintClass}>
-        {copy.phoneHint}
+        {t.phoneHint}
       </p>
       <input
         id="member-phone"
@@ -125,6 +136,122 @@ const readForm = (form: HTMLFormElement) => {
   };
 };
 
+/**
+ * Second step of signing in by emailed code.
+ *
+ * Focus moves to the code box on arrival, since the previous form has just
+ * vanished and a keyboard or screen reader user would otherwise be left
+ * nowhere. Errors are announced and linked to the box, as elsewhere.
+ */
+const CodeStep = ({
+  email,
+  onVerified,
+  onResend,
+  onBack,
+}: {
+  email: string;
+  onVerified: () => Promise<void>;
+  onResend: () => Promise<void>;
+  onBack: () => void;
+}) => {
+  const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setInfo(null);
+    const code = String(new FormData(event.currentTarget).get('code') ?? '').replace(/\s/g, '');
+    if (!code) {
+      setError('Please type the code from your email.');
+      return;
+    }
+    setError(null);
+    setBusy(true);
+    try {
+      await accounts.verify(email, code);
+      await onVerified();
+    } catch (problem) {
+      setError((problem as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const again = async () => {
+    setError(null);
+    setInfo(null);
+    setBusy(true);
+    try {
+      await onResend();
+      setInfo(t.resent);
+    } catch (problem) {
+      setError((problem as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div>
+      <h3 className="mb-4 text-xl font-bold text-[var(--color-body-strong)]">{t.codeHeading}</h3>
+      <form onSubmit={submit} noValidate aria-label={t.codeHeading}>
+        <div className="mb-6">
+          <label htmlFor="code-input" className={labelClass}>
+            {t.codeLabel}
+          </label>
+          <p id="code-hint" className={hintClass}>
+            {fill(t.codeHint, { email })}
+          </p>
+          <input
+            id="code-input"
+            name="code"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            spellCheck={false}
+            autoFocus
+            disabled={busy}
+            aria-describedby={`code-hint${error ? ' code-error' : ''}`}
+            aria-invalid={!!error}
+            className={fieldClass}
+          />
+          {error && (
+            <p id="code-error" role="alert" className={errorClass}>
+              {error}
+            </p>
+          )}
+          {info && (
+            <p role="status" className="mt-2 text-base font-semibold text-[var(--color-body-strong)]">
+              {info}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <button type="submit" disabled={busy} className={`${primaryButton} w-full disabled:opacity-60 sm:w-auto`}>
+            {busy ? 'Checking…' : t.codeButton}
+          </button>
+          <button
+            type="button"
+            onClick={again}
+            disabled={busy}
+            className="min-h-12 w-full rounded-full border-2 border-[var(--color-body-strong)] px-6 font-semibold text-[var(--color-body-strong)] disabled:opacity-60 sm:w-auto"
+          >
+            {t.resendButton}
+          </button>
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={busy}
+            className="min-h-12 w-full rounded-full px-6 font-semibold text-[var(--color-brand-deep)] underline underline-offset-4 disabled:opacity-60 sm:w-auto"
+          >
+            {t.changeEmailButton}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
 /** Shown to every signed-out visitor, and to anyone who signed in on a device
  *  that had no account yet. */
 const SignedOut = ({ onChange }: { onChange: () => Promise<void> }) => {
@@ -132,18 +259,28 @@ const SignedOut = ({ onChange }: { onChange: () => Promise<void> }) => {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Set once a code has been emailed; shows the code form instead of the tabs.
+  const [codeFor, setCodeFor] = useState<string | null>(null);
+  const resend = useRef<() => Promise<void>>(async () => {});
 
   const submitCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setNotice(null);
     const input = readForm(event.currentTarget);
-    const found = validate(input);
+    const found = validate(input, { requireEmail: accounts.requiresEmail });
     setErrors(found);
     if (hasErrors(found)) return;
     setBusy(true);
     try {
-      await accounts.register(input);
-      await onChange();
+      const step = await accounts.register(input);
+      if (step.kind === 'code-sent') {
+        // Remember how to ask again, so "send a new code" works for someone
+        // whose account does not exist yet as well as for a returning member.
+        resend.current = async () => void (await accounts.register(input));
+        setCodeFor(step.email);
+      } else {
+        await onChange();
+      }
     } catch (error) {
       setNotice((error as Error).message);
     } finally {
@@ -165,8 +302,13 @@ const SignedOut = ({ onChange }: { onChange: () => Promise<void> }) => {
     if (hasErrors(found)) return;
     setBusy(true);
     try {
-      await accounts.signIn(email);
-      await onChange();
+      const step = await accounts.signIn(email);
+      if (step.kind === 'code-sent') {
+        resend.current = async () => void (await accounts.signIn(email));
+        setCodeFor(step.email);
+      } else {
+        await onChange();
+      }
     } catch (error) {
       setNotice((error as Error).message);
     } finally {
@@ -180,6 +322,20 @@ const SignedOut = ({ onChange }: { onChange: () => Promise<void> }) => {
         ? 'bg-[var(--color-brand)] text-white'
         : 'border-2 border-[var(--color-brand)]/30 text-[var(--color-body-strong)]'
     }`;
+
+  if (codeFor) {
+    return (
+      <CodeStep
+        email={codeFor}
+        onVerified={onChange}
+        onResend={() => resend.current()}
+        onBack={() => {
+          setCodeFor(null);
+          setErrors({});
+        }}
+      />
+    );
+  }
 
   return (
     <div>
@@ -232,7 +388,7 @@ const SignedOut = ({ onChange }: { onChange: () => Promise<void> }) => {
               Email address
             </label>
             <p id="signin-email-hint" className={hintClass}>
-              {copy.signInEmailHint}
+              {t.signInEmailHint}
             </p>
             <input
               id="signin-email"
@@ -273,7 +429,7 @@ const SignedIn = ({ member, onChange }: { member: Member; onChange: () => Promis
     event.preventDefault();
     setNotice(null);
     const input = readForm(event.currentTarget);
-    const found = validate(input);
+    const found = validate(input, { requireEmail: accounts.requiresEmail });
     setErrors(found);
     if (hasErrors(found)) return;
     setBusy(true);
@@ -326,7 +482,12 @@ const SignedIn = ({ member, onChange }: { member: Member; onChange: () => Promis
       )}
 
       <form onSubmit={save} noValidate aria-label="Your details">
-        <MemberFields defaults={member} errors={errors} disabled={busy} />
+        <MemberFields
+          defaults={member}
+          errors={errors}
+          disabled={busy}
+          emailLocked={!accounts.canChangeEmail}
+        />
         <button type="submit" disabled={busy} className={`${primaryButton} w-full disabled:opacity-60 sm:w-auto`}>
           Save my details
         </button>
@@ -335,7 +496,7 @@ const SignedIn = ({ member, onChange }: { member: Member; onChange: () => Promis
       <div className="mt-12 border-t border-[var(--color-brand)]/20 pt-8">
         <h3 className="mb-4 text-xl font-bold text-[var(--color-body-strong)]">{copy.signOutHeading}</h3>
         <p className="mb-4 text-base text-[var(--color-body)]">
-          {copy.signOutText}
+          {t.signOutText}
         </p>
         <button
           type="button"
@@ -350,7 +511,7 @@ const SignedIn = ({ member, onChange }: { member: Member; onChange: () => Promis
       <div className="mt-12 border-t border-[var(--color-brand)]/20 pt-8">
         <h3 className="mb-4 text-xl font-bold text-[var(--color-body-strong)]">{copy.deleteHeading}</h3>
         <p className="mb-4 text-base text-[var(--color-body)]">
-          {copy.deleteText}
+          {t.deleteText}
         </p>
         {!confirmDelete ? (
           <button
@@ -390,8 +551,39 @@ const SignedIn = ({ member, onChange }: { member: Member; onChange: () => Promis
   );
 };
 
+/**
+ * Shown instead of the whole page while the account gate is on (see
+ * content.waitlist.gates). The sign-up and sign-in forms are not rendered.
+ *
+ * This hides the page; it does not by itself stop someone calling the account
+ * service directly. When real accounts go live, also switch off new sign-ups in
+ * Supabase until the gate is opened.
+ */
+const AccountWaitlist = () => {
+  const wl = content.waitlist.account;
+  return (
+    <>
+      <section className="relative overflow-hidden bg-[var(--color-mist)] px-6 pt-32 pb-14 md:px-12 md:pt-40 md:pb-20">
+        <div className="relative mx-auto max-w-2xl">
+          <p className={`mb-4 ${eyebrow}`}>{wl.eyebrow}</p>
+          <h1 className="mb-6 text-[clamp(2rem,7vw,4rem)] font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)]">
+            {wl.heading}
+          </h1>
+          <p className="text-lg leading-relaxed text-[var(--color-body)]">{wl.intro}</p>
+        </div>
+      </section>
+
+      <section className="bg-[var(--color-paper)] px-6 py-14 md:px-12 md:py-20">
+        <div className="mx-auto max-w-2xl">
+          <WaitlistGate source="account" heading={wl.cardHeading} />
+        </div>
+      </section>
+    </>
+  );
+};
 const Account = () => {
   const { member, loading, refresh } = useAccount();
+  if (content.waitlist.gates.account) return <AccountWaitlist />;
 
   return (
     <>
@@ -402,7 +594,7 @@ const Account = () => {
             {copy.heading}
           </h1>
           <p className="text-lg leading-relaxed text-[var(--color-body)]">
-            {copy.intro}
+            {t.intro}
           </p>
         </div>
       </section>
@@ -430,7 +622,7 @@ const Account = () => {
           <div className="mt-16 rounded-2xl border border-[var(--color-brand)]/20 bg-[var(--color-mist)] p-6">
             <h3 className="mb-3 text-lg font-bold text-[var(--color-body-strong)]">{copy.privacyHeading}</h3>
             <ul className="list-disc space-y-2 pl-5 text-base leading-relaxed text-[var(--color-body)]">
-              {copy.privacyPoints.map((point) => (
+              {t.privacyPoints.map((point) => (
                 <li key={point}>{point}</li>
               ))}
             </ul>

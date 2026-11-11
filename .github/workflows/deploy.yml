@@ -49,6 +49,14 @@ jobs:
           # A separate key from the calendar's: a Google API key can be limited to
           # particular APIs, and the calendar key is limited to Calendar only.
           VITE_GDRIVE_KEY: ${{ secrets.VITE_GDRIVE_KEY }}
+          # Member accounts. Unset or empty keeps the browser-only demo live; set
+          # VITE_ACCOUNTS_BACKEND to supabase (with the next two) to switch over.
+          VITE_ACCOUNTS_BACKEND: ${{ secrets.VITE_ACCOUNTS_BACKEND }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_KEY }}
+          # Waitlist sign-ups (both values are public by design).
+          VITE_WAITLIST_URL: ${{ secrets.VITE_WAITLIST_URL }}
+          VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
         run: npm run build
 
       - uses: actions/configure-pages@v5

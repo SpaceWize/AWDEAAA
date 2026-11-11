@@ -3,12 +3,55 @@ import AmbientBackdrop from '../components/AmbientBackdrop';
 import ImagePlaceholder from '../components/ImagePlaceholder';
 import ScrollReveal from '../components/ScrollReveal';
 import StaggerContainer, { staggerChild } from '../components/StaggerContainer';
+import WaitlistGate from '../components/WaitlistGate';
 import { content } from '../content';
 import { eyebrow, primaryButton, sectionTitle } from '../lib/styles';
 
 const { matters, help, methods } = content.donate;
 
-const Donate = () => (
+const contactLink =
+  'inline-flex min-h-11 items-center font-semibold text-[var(--color-brand-deep)] underline underline-offset-4 hover:text-[var(--color-brand)]';
+
+/**
+ * Shown instead of the whole page while the Donate gate is on (see
+ * content.waitlist.gates). Nothing below the heading is rendered, so there is no
+ * payment link on the page for anyone to reach.
+ */
+const DonateWaitlist = () => {
+  const wl = content.waitlist.donate;
+  return (
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-[var(--color-mist)] px-6 pt-28 pb-14 md:px-12">
+      <AmbientBackdrop />
+      <div className="relative mx-auto grid w-full max-w-6xl items-center gap-8 md:gap-14 md:grid-cols-2">
+        <ScrollReveal direction="left">
+          <p className={`mb-4 ${eyebrow}`}>{wl.eyebrow}</p>
+          <h1 className="mb-6 text-5xl font-extrabold leading-[1.05] tracking-tight text-[var(--color-body-strong)] md:text-6xl">
+            {wl.heading}
+          </h1>
+          <p className="text-lg leading-relaxed text-[var(--color-body)]">{wl.intro}</p>
+        </ScrollReveal>
+        <ScrollReveal direction="right" delay={0.15}>
+          <WaitlistGate source="donate" heading={wl.cardHeading}>
+            <div className="mt-6 border-t border-[var(--color-brand)]/20 pt-5">
+              <p className="mb-1 text-base text-[var(--color-body)]">{wl.contactLead}</p>
+              <p className="flex flex-wrap gap-x-5">
+                <a href={`mailto:${content.contact.email}`} className={contactLink}>
+                  {content.contact.email}
+                </a>
+                <a href={`tel:${content.contact.phone.replace(/\D/g, '')}`} className={contactLink}>
+                  {content.contact.phone}
+                </a>
+              </p>
+            </div>
+          </WaitlistGate>
+        </ScrollReveal>
+      </div>
+    </section>
+  );
+};
+const Donate = () => {
+  if (content.waitlist.gates.donate) return <DonateWaitlist />;
+  return (
   <>
     <section className="relative overflow-hidden bg-[var(--color-mist)] px-6 pt-36 pb-20 md:px-12">
       <AmbientBackdrop />
@@ -115,6 +158,7 @@ const Donate = () => (
       </div>
     </section>
   </>
-);
+  );
+};
 
 export default Donate;

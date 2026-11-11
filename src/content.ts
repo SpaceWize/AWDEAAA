@@ -424,8 +424,95 @@ export const content = {
       "Credit card payments are handled by Stripe. Card details never reach AWDEA.",
       "You can change or delete your details at any time from this page.",
     ],
+
+    // -------------------------------------------------------------------
+    // The same page once real accounts are switched on (sign-in by a code
+    // we email). Any line left out here falls back to the line above.
+    // -------------------------------------------------------------------
+    cloud: {
+      intro:
+        "Create an account to keep your details with AWDEA. We email you a code to sign in, so there is no password to remember.",
+      emailHint: "We email a sign-in code to this address.",
+      phoneHint: "Optional. Include the area code.",
+      emailLockedHint:
+        "This is the address we send your sign-in code to. To change it, please contact AWDEA.",
+      signOutText: "Signs you out on this device. Your account stays saved with AWDEA.",
+      deleteText:
+        "This removes your name, email, phone number and raffle entries from AWDEA. It cannot be undone.",
+      privacyPoints: [
+        "We only ask for what we need: a name or username, an email address, and an optional phone number.",
+        "We do not ask for anything about your disability.",
+        "Credit card payments are handled by Stripe. Card details never reach AWDEA.",
+        "Each member can see only their own details. You can change or delete yours at any time from this page.",
+      ],
+      codeHeading: "Check your email",
+      codeLabel: "Sign-in code",
+      codeHint:
+        "We sent a code to {email}. It can take a minute or two to arrive, so please check your junk folder too. Type the code here.",
+      codeButton: "Sign in",
+      resendButton: "Send a new code",
+      resent: "A new code is on its way.",
+      changeEmailButton: "Use a different email address",
+      signInEmailHint: "The email address on your account. We email you a code.",
+    },
   },
 
+  // ---------------------------------------------------------------------
+  // Waitlist. While a gate is on, visitors see a sign-up form for the
+  // waitlist INSTEAD of that page. Their email address goes into AWDEA's
+  // Google Sheet.
+  // ---------------------------------------------------------------------
+  waitlist: {
+    // TO OPEN A PAGE TO EVERYONE: change true to false on its line, and save.
+    // To close it again, change it back to true.
+    gates: {
+      donate: true,
+      account: true,
+    },
+
+    form: {
+      emailLabel: "Email address",
+      emailHint: "We will use it to tell you when this opens.",
+      consent:
+        "By joining, you agree that AWDEA may email you about this. We will not share your email address, and you can ask us to remove it at any time.",
+      button: "Join the waitlist",
+      sending: "Joining…",
+      checking: "Checking that you are a person, not a program…",
+      successHeading: "You are on the list",
+      successText: "Thank you. We will email {email} when this opens.",
+      alreadyHeading: "You are already on the list",
+      alreadyText: "We have {email} and will email it when this opens.",
+      errorEmpty: "Please enter your email address.",
+      errorInvalid: "That email address does not look right.",
+      errorWaitForCheck: "Please wait a moment for the security check to finish, then try again.",
+      errorBotCheck:
+        "We could not confirm that you are a person. Please try again, or contact AWDEA.",
+      errorCheckBlocked:
+        "The security check could not load. A browser extension may be blocking it. Please allow it for this site and reload, or contact AWDEA.",
+      errorNetwork: "We could not reach the server. Check your connection and try again.",
+      errorServer: "Something went wrong on our side. Please try again in a few minutes.",
+      errorNotConnected: "The waitlist is not switched on yet. Please contact AWDEA.",
+    },
+
+    // The Donate page while its gate is on
+    donate: {
+      eyebrow: "Opening soon",
+      heading: "Online donations open soon",
+      intro:
+        "We are getting ready to open online donations. Join the waitlist and we will email you the moment they open.",
+      cardHeading: "Join the waitlist",
+      contactLead: "Want to donate tickets, or help sooner? Contact James:",
+    },
+
+    // The My account page while its gate is on
+    account: {
+      eyebrow: "Members",
+      heading: "Member accounts open soon",
+      intro:
+        "We are getting ready to open member accounts, where you will be able to register for events and raffles. Join the waitlist and we will email you when they open.",
+      cardHeading: "Join the waitlist",
+    },
+  },
   // ---------------------------------------------------------------------
   // Bottom of every page (footer)
   // ---------------------------------------------------------------------
