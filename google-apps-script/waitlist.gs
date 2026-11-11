@@ -2,37 +2,54 @@
  * AWDEA waitlist: receives sign-ups from the website and adds them to a Sheet.
  *
  * This file lives in the Google Sheet itself (Extensions > Apps Script), not on
- * the website. It is kept here so there is a copy, and so changes are tracked.
+ * the website. It is kept in the project so there is a copy, and so changes are
+ * tracked.
  *
  * ---------------------------------------------------------------------------
- *  SET-UP (about 15 minutes, once)
+ *  SET-UP (about 10 minutes, once)
  * ---------------------------------------------------------------------------
  *  1. Sign in to the Google account that should OWN the list (an AWDEA one, not
  *     a personal one). Create a new Google Sheet called "AWDEA Waitlist".
  *  2. In the Sheet: Extensions > Apps Script. Delete what is there, paste ALL of
- *     this file, and click Save.
- *  3. Cloudflare Turnstile (the bot check). Go to dash.cloudflare.com, create a
- *     free account, open Turnstile, and add a widget:
- *       - Hostnames: spacewize.github.io  (add awdea.org later)
- *       - Widget mode: Managed
- *     You get two keys. The SITE key is public. The SECRET key is private.
- *  4. In Apps Script: Project Settings (gear icon) > Script properties > Add:
- *       TURNSTILE_SECRET = the SECRET key from Cloudflare
- *       ALLOWED_HOSTS    = spacewize.github.io   (comma-separate to add more)
- *  5. Deploy > New deployment > the gear icon > Web app.
+ *     this file, and click Save (the disk icon).
+ *  3. Deploy > New deployment > the gear icon > Web app.
  *       Execute as: Me
  *       Who has access: Anyone
- *     Click Deploy and approve the permissions. COPY the Web app URL it shows.
- *  6. Give the website two values (public, safe to share):
- *       VITE_WAITLIST_URL        = the Web app URL from step 5
- *       VITE_TURNSTILE_SITEKEY   = the SITE key from step 3
+ *     Click Deploy. Google asks you to authorise it: click "Authorize access",
+ *     choose your account, then "Advanced" and "Go to ... (unsafe)". That
+ *     warning is normal for a script you wrote yourself; it is your own script.
+ *  4. COPY the "Web app" address it shows (it ends in /exec).
+ *  5. Give the website that one address:  VITE_WAITLIST_URL = the address
  *
  *  IF YOU EDIT THIS SCRIPT LATER you must redeploy for it to take effect:
  *  Deploy > Manage deployments > pencil > Version: New version > Deploy.
+ *
+ *  Rows appear in a tab called "Waitlist", which the script creates itself the
+ *  first time someone signs up.
  * ---------------------------------------------------------------------------
  *
- *  Never put the Turnstile SECRET key in the website or in this file. It belongs
- *  only in Script properties, where the website cannot see it.
+ *  HOW IT TELLS PEOPLE FROM PROGRAMS
+ *  1. A hidden field. The sign-up form has an extra box that no visitor can see
+ *     or reach. A person never fills it in; a form-filling program usually does.
+ *     When it is filled, the script answers "success" so the program believes it
+ *     worked, but it saves nothing.
+ *  2. A minimum time. A form submitted in under a second was not typed by a
+ *     person.
+ *  3. A flood limit. If a lot of new addresses arrive at once, the script stops
+ *     adding rows for a few minutes, so a bot cannot fill the Sheet.
+ *  4. Checks on the address itself, and one row per address.
+ *
+ *  Be aware of what this does NOT do: a determined person who writes a program
+ *  aimed at this particular form can get past layers 1 and 2. The flood limit
+ *  caps the damage to a handful of junk rows, which you can delete. For stronger
+ *  protection later, Cloudflare Turnstile can be added. Make a free Turnstile
+ *  widget at dash.cloudflare.com, then:
+ *    - in this script: Project Settings (gear) > Script properties > add
+ *        TURNSTILE_SECRET = the widget's SECRET key
+ *        ALLOWED_HOSTS    = spacewize.github.io   (comma-separate to add more)
+ *    - on the website: set VITE_TURNSTILE_SITEKEY to the widget's SITE key.
+ *  Once both are set the check is enforced. The secret key goes ONLY in Script
+ *  properties; never in the website.
  *
  *  The web address of this script can be found by anyone who reads the site, so
  *  every request is treated as untrusted and checked here.
@@ -48,6 +65,10 @@ var SOURCES = { donate: true, account: true };
 var MIN_FILL_MS = 1000;
 var MAX_BODY_CHARS = 2000;
 var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// Flood limit: at most this many NEW addresses in any burst. The count resets
+// once it has been quiet for WINDOW_SECONDS.
+var MAX_NEW_PER_WINDOW = 25;
+var WINDOW_SECONDS = 600;
 
 function doPost(e) {
   var raw = e && e.postData ? e.postData.contents : '';
@@ -72,13 +93,13 @@ function handleSubmission_(raw) {
 
     var p = JSON.parse(raw);
 
-    // 1. The hidden field. No person can see it, so only a bot fills it in.
-    //    Pretend it worked so the bot learns nothing.
+    // 1. The hidden field. No person can see it, so only a program fills it in.
+    //    Pretend it worked so the program learns nothing.
     if (p.website) return { ok: true };
 
     // 2. Far too quick to have been typed by a person. This number comes from the
-    //    visitor's browser, so a bot can lie about it. It only catches lazy ones;
-    //    the Cloudflare check below is the real defence.
+    //    visitor's browser, so a program can lie about it; it only catches lazy
+    //    ones.
     if (typeof p.elapsedMs === 'number' && p.elapsedMs < MIN_FILL_MS) {
       return { ok: false, error: 'too_fast' };
     }
@@ -90,35 +111,36 @@ function handleSubmission_(raw) {
       return { ok: false, error: 'invalid_email' };
     }
 
-    // 4. Ask Cloudflare whether the visitor passed the bot check.
+    // 4. OPTIONAL: Cloudflare's "are you a person" check. Only runs if a secret
+    //    key has been saved in Script properties; otherwise it is skipped.
     var props = PropertiesService.getScriptProperties();
     var secret = props.getProperty('TURNSTILE_SECRET');
-    if (!secret) return { ok: false, error: 'server' };
+    if (secret) {
+      var verdict = JSON.parse(
+        UrlFetchApp.fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'post',
+          payload: { secret: secret, response: String(p.token || '') },
+          muteHttpExceptions: true,
+        }).getContentText()
+      );
+      if (!verdict.success) return { ok: false, error: 'bot_check_failed' };
 
-    var verdict = JSON.parse(
-      UrlFetchApp.fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-        method: 'post',
-        payload: { secret: secret, response: String(p.token || '') },
-        muteHttpExceptions: true,
-      }).getContentText()
-    );
-    if (!verdict.success) return { ok: false, error: 'bot_check_failed' };
-
-    // 5. A token earned on some other website is no use here.
-    var allowed = props.getProperty('ALLOWED_HOSTS');
-    if (allowed) {
-      var hosts = allowed.split(',').map(function (h) {
-        return h.trim().toLowerCase();
-      });
-      if (hosts.indexOf(String(verdict.hostname || '').toLowerCase()) === -1) {
-        return { ok: false, error: 'bot_check_failed' };
+      // A token earned on some other website is no use here.
+      var allowed = props.getProperty('ALLOWED_HOSTS');
+      if (allowed) {
+        var hosts = allowed.split(',').map(function (h) {
+          return h.trim().toLowerCase();
+        });
+        if (hosts.indexOf(String(verdict.hostname || '').toLowerCase()) === -1) {
+          return { ok: false, error: 'bot_check_failed' };
+        }
       }
     }
 
     var page = SOURCES[p.source] ? p.source : 'unknown';
 
-    // 6. Add the row. One person at a time, so two sign-ups at once cannot
-    //    both pass the duplicate check and both be added.
+    // 5. Add the row. One request at a time, so two sign-ups at once cannot both
+    //    pass the duplicate check and both be added.
     var lock = LockService.getScriptLock();
     if (!lock.tryLock(15000)) return { ok: false, error: 'server' };
     try {
@@ -128,6 +150,13 @@ function handleSubmission_(raw) {
       for (var i = 0; i < existing.length; i++) {
         if (String(existing[i][0]).toLowerCase() === email) return { ok: true, duplicate: true };
       }
+
+      // Flood limit, counted only for addresses that would really be added.
+      var cache = CacheService.getScriptCache();
+      var recent = Number(cache.get('recentSignups') || 0);
+      if (recent >= MAX_NEW_PER_WINDOW) return { ok: false, error: 'busy' };
+      cache.put('recentSignups', String(recent + 1), WINDOW_SECONDS);
+
       sheet.appendRow([new Date(), email, page, CONSENT_NOTE]);
     } finally {
       lock.releaseLock();

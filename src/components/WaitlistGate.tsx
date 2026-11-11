@@ -44,11 +44,14 @@ interface WaitlistGateProps {
  * A waitlist sign-up card: one email field, a bot check, and a clear result.
  *
  * Bot protection comes in layers, because each stops what the others miss:
- *  1. Cloudflare Turnstile, checked on the server, not just in this page.
- *  2. A hidden "website" field that a person never sees and a form-filling
- *     script usually completes.
- *  3. How long the form was open. A person takes more than a couple of
- *     seconds; the script rejects anything faster.
+ *  1. A hidden "website" field that a person never sees and a form-filling
+ *     script usually completes. A filled trap still looks like a success to the
+ *     sender, so the program learns nothing; the script just saves nothing.
+ *  2. How long the form was open. A person takes more than a second or so; the
+ *     script rejects anything faster.
+ *  3. Optionally, Cloudflare Turnstile, when a site key is configured. It is
+ *     checked on the server, not just in this page.
+ *  The script also limits floods and checks the address itself.
  *
  * Accessibility: the field has a visible label and hint, every error is
  * announced and linked to the field, and on success focus moves to the
@@ -84,8 +87,9 @@ const WaitlistGate = ({ source, heading, children }: WaitlistGateProps) => {
     if (!email) return refuse(copy.errorEmpty);
     if (!EMAIL.test(email)) return refuse(copy.errorInvalid);
     if (!isWaitlistConfigured) return refuse(copy.errorNotConnected, false);
-    if (checkBlocked) return refuse(copy.errorCheckBlocked, false);
-    if (!token) return refuse(copy.errorWaitForCheck, false);
+    // Without a Turnstile key there is no check to wait for.
+    if (TURNSTILE_SITE_KEY && checkBlocked) return refuse(copy.errorCheckBlocked, false);
+    if (TURNSTILE_SITE_KEY && !token) return refuse(copy.errorWaitForCheck, false);
 
     setBusy(true);
     try {

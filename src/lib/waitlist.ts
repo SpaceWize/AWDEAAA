@@ -2,22 +2,28 @@
  * Waitlist sign-ups, sent to a Google Apps Script attached to AWDEA's Sheet.
  * See google-apps-script/waitlist.gs for the other half.
  *
- * The browser never writes to the Sheet itself. It posts the email address and
- * a Cloudflare Turnstile token to the script, and the script checks the token
- * with Cloudflare using a secret that lives only in the script's own settings.
- * That is why the secret is not in this site, and why a bot cannot skip the
- * check by editing the page.
+ * The browser never writes to the Sheet itself. It posts the email address to
+ * the script, which decides whether to accept it. The script's address can be
+ * found by anyone who reads the page, so the script treats every request as
+ * untrusted: a hidden trap field, a minimum fill time, a flood limit and checks
+ * on the address itself all live there, out of the visitor's reach.
  *
- * Both values below are public by design. The script address can be found by
- * anyone who reads the page, so the script treats every request as untrusted.
+ * Cloudflare Turnstile is optional. If a site key is set, the page shows the
+ * check and sends its token, and the script verifies it with Cloudflare using a
+ * secret that lives only in the script's own settings. If no site key is set,
+ * none of that is used.
  */
 
 const SCRIPT_URL = import.meta.env.VITE_WAITLIST_URL as string | undefined;
 
-/** The Turnstile SITE key (public). The matching SECRET key goes in the script. */
-export const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITEKEY as string | undefined;
+/**
+ * The Turnstile SITE key (public), or empty to run without Cloudflare. The
+ * matching SECRET key goes only in the script's own settings.
+ */
+export const TURNSTILE_SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITEKEY as string | undefined) || undefined;
 
-export const isWaitlistConfigured = Boolean(SCRIPT_URL && TURNSTILE_SITE_KEY);
+/** Only the script address is needed. The Turnstile key is an optional extra. */
+export const isWaitlistConfigured = Boolean(SCRIPT_URL);
 
 export type WaitlistResult = 'joined' | 'already';
 
@@ -33,8 +39,8 @@ export class WaitlistError extends Error {
 
 export interface WaitlistRequest {
   email: string;
-  /** The Turnstile token proving the visitor passed the check. */
-  token: string;
+  /** The Turnstile token proving the visitor passed the check, if Turnstile is on. */
+  token: string | null;
   /** Which page the visitor signed up from, saved beside the email. */
   source: 'donate' | 'account';
   /** When the form appeared. A person takes a moment; a script does not. */
@@ -46,7 +52,7 @@ export interface WaitlistRequest {
 const TIMEOUT_MS = 20000;
 
 export const joinWaitlist = async (request: WaitlistRequest): Promise<WaitlistResult> => {
-  if (!SCRIPT_URL || !TURNSTILE_SITE_KEY) throw new WaitlistError('not_configured');
+  if (!SCRIPT_URL) throw new WaitlistError('not_configured');
 
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -60,7 +66,7 @@ export const joinWaitlist = async (request: WaitlistRequest): Promise<WaitlistRe
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         email: request.email,
-        token: request.token,
+        token: request.token ?? '',
         source: request.source,
         elapsedMs: Date.now() - request.startedAt,
         website: request.website,
