@@ -1,4 +1,11 @@
 /**
+ * @OnlyCurrentDoc
+ *
+ * The line above limits the script to the one Sheet it is attached to. Without
+ * it, Google asks for permission over every spreadsheet in the account. Keep it.
+ */
+
+/**
  * AWDEA waitlist: receives sign-ups from the website and adds them to a Sheet.
  *
  * This file lives in the Google Sheet itself (Extensions > Apps Script), not on
@@ -15,9 +22,8 @@
  *  3. Deploy > New deployment > the gear icon > Web app.
  *       Execute as: Me
  *       Who has access: Anyone
- *     Click Deploy. Google asks you to authorise it: click "Authorize access",
- *     choose your account, then "Advanced" and "Go to ... (unsafe)". That
- *     warning is normal for a script you wrote yourself; it is your own script.
+ *     Click Deploy. If Google asks you to authorise it, choose your account and
+ *     allow it. (The only permission it needs is to this one Sheet.)
  *  4. COPY the "Web app" address it shows (it ends in /exec).
  *  5. Give the website that one address:  VITE_WAITLIST_URL = the address
  *
@@ -41,15 +47,11 @@
  *
  *  Be aware of what this does NOT do: a determined person who writes a program
  *  aimed at this particular form can get past layers 1 and 2. The flood limit
- *  caps the damage to a handful of junk rows, which you can delete. For stronger
- *  protection later, Cloudflare Turnstile can be added. Make a free Turnstile
- *  widget at dash.cloudflare.com, then:
- *    - in this script: Project Settings (gear) > Script properties > add
- *        TURNSTILE_SECRET = the widget's SECRET key
- *        ALLOWED_HOSTS    = spacewize.github.io   (comma-separate to add more)
- *    - on the website: set VITE_TURNSTILE_SITEKEY to the widget's SITE key.
- *  Once both are set the check is enforced. The secret key goes ONLY in Script
- *  properties; never in the website.
+ *  caps the damage to a handful of junk rows, which you can delete.
+ *
+ *  This version deliberately does not use Cloudflare or any other outside
+ *  service, so it asks Google for the smallest possible permission: access to
+ *  this one Sheet and nothing else.
  *
  *  The web address of this script can be found by anyone who reads the site, so
  *  every request is treated as untrusted and checked here.
@@ -111,35 +113,9 @@ function handleSubmission_(raw) {
       return { ok: false, error: 'invalid_email' };
     }
 
-    // 4. OPTIONAL: Cloudflare's "are you a person" check. Only runs if a secret
-    //    key has been saved in Script properties; otherwise it is skipped.
-    var props = PropertiesService.getScriptProperties();
-    var secret = props.getProperty('TURNSTILE_SECRET');
-    if (secret) {
-      var verdict = JSON.parse(
-        UrlFetchApp.fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-          method: 'post',
-          payload: { secret: secret, response: String(p.token || '') },
-          muteHttpExceptions: true,
-        }).getContentText()
-      );
-      if (!verdict.success) return { ok: false, error: 'bot_check_failed' };
-
-      // A token earned on some other website is no use here.
-      var allowed = props.getProperty('ALLOWED_HOSTS');
-      if (allowed) {
-        var hosts = allowed.split(',').map(function (h) {
-          return h.trim().toLowerCase();
-        });
-        if (hosts.indexOf(String(verdict.hostname || '').toLowerCase()) === -1) {
-          return { ok: false, error: 'bot_check_failed' };
-        }
-      }
-    }
-
     var page = SOURCES[p.source] ? p.source : 'unknown';
 
-    // 5. Add the row. One request at a time, so two sign-ups at once cannot both
+    // 4. Add the row. One request at a time, so two sign-ups at once cannot both
     //    pass the duplicate check and both be added.
     var lock = LockService.getScriptLock();
     if (!lock.tryLock(15000)) return { ok: false, error: 'server' };
